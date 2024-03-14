@@ -9,7 +9,7 @@ if [[ -z "$NIXOS_CONFIG_DIR" ]]; then
 fi
 
 # cd to your config dir
-pushd $NIXOS_CONFIG_DIR
+pushd "$NIXOS_CONFIG_DIR"
 
 # Edit your config
 kate -b "admin:$(pwd)/configuration.nix"

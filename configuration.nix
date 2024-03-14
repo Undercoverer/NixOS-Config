@@ -113,8 +113,7 @@
 
   environment.systemPackages = let
     unstable = import <nixos-unstable> {};
-    nixos-rebuild-commit = import ./nixos-rebuild-commit.nix { inherit pkgs; };
-
+    nixos-rebuild-commit = import ./nixos-rebuild-commit.nix {inherit pkgs;};
   in
     with pkgs; [
       nixos-rebuild-commit

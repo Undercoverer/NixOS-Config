@@ -1,5 +1,4 @@
-{ pkgs }:
-
+{pkgs}:
 pkgs.stdenv.mkDerivation rec {
   pname = "nixos-rebuild-commit";
   version = "0.1.0";
