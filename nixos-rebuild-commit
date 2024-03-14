@@ -3,11 +3,16 @@
 
 set -e
 
+if [[ -z "$NIXOS_CONFIG_DIR" ]]; then
+    echo "\$NIXOS_CONFIG_DIR is not set. Please set it to the directory containing your configuration.nix file"
+    exit 1
+fi
+
 # cd to your config dir
 pushd $NIXOS_CONFIG_DIR
 
 # Edit your config
-kate -b admin:$(pwd)/configuration.nix
+kate -b "admin:$(pwd)/configuration.nix"
 
 # Autoformat your nix files
 alejandra . >/dev/null
@@ -18,7 +23,7 @@ git diff -U0 *.nix
 echo "NixOS Rebuilding..."
 
 # Rebuild, output simplified errors, log trackebacks
-sudo nixos-rebuild switch -I nixos-config=$(pwd)/configuration.nix &>nixos-switch.log || (cat nixos-switch.log | grep --color error && false)
+sudo nixos-rebuild switch -I nixos-config="$(pwd)/configuration.nix" &>nixos-switch.log || (cat nixos-switch.log | grep --color error && false)
 
 # Get current generation metadata
 current=$(nixos-rebuild list-generations | grep current)

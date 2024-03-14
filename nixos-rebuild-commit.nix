@@ -1,22 +1,21 @@
-{ stdenv, fetchFromGitHub }:
+{ pkgs }:
 
-stdenv.mkDerivation rec {
+pkgs.stdenv.mkDerivation rec {
   pname = "nixos-rebuild-commit";
   version = "0.1.0";
 
-  src = fetchFromGitHub {
+  src = pkgs.fetchFromGitHub {
     owner = "Undercoverer";
     repo = "NixOS-Config";
     rev = "1690993";
-    sha256 = "169099326e45479d54d123e64410b8533c44f5a4";
+    hash = "sha256-nszqES4DwopoGM8NR9sieDsx5Nl/tExFKqYr1AWXr7o=";
   };
 
   installPhase = ''
-    mkdir -p $out/bin
-    cp nixos-rebuild-commit $out/bin/
+    install -D nixos-rebuild-commit $out/bin/nixos-rebuild-commit
   '';
 
-  meta = with stdenv.lib; {
+  meta = with pkgs.lib; {
     description = "Safe build / install + git integration";
     homepage = "https://github.com/Undercoverer/NixOS-Config";
     license = licenses.gpl2;
