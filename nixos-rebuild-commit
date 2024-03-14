@@ -12,7 +12,7 @@ fi
 pushd "$NIXOS_CONFIG_DIR"
 
 # Edit your config
-kate -b "admin:$(pwd)/configuration.nix"
+kate -b "admin:$(pwd)/configuration.nix" >/dev/null
 
 # Autoformat your nix files
 alejandra . >/dev/null
