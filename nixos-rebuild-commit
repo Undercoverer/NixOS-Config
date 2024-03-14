@@ -12,10 +12,10 @@ fi
 pushd "$NIXOS_CONFIG_DIR"
 
 # Edit your config
-kate -b "admin:$(pwd)/configuration.nix" >/dev/null
+kate -b "admin:$(pwd)/configuration.nix" &> /dev/null
 
 # Autoformat your nix files
-alejandra . >/dev/null
+alejandra . &> /dev/null
 
 # Shows your changes
 git diff -U0 *.nix

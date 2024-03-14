@@ -288,10 +288,4 @@
   environment.sessionVariables = {
     MOZ_USE_XINPUT2 = "1";
   };
-
-  #    qt = {
-  #      enable = true;
-  #       platformTheme = "gnome";
-  #     style = "adwaita-dark";
-  #};
 }
