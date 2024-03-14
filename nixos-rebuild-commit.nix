@@ -6,8 +6,8 @@ pkgs.stdenv.mkDerivation rec {
   src = pkgs.fetchFromGitHub {
     owner = "Undercoverer";
     repo = "NixOS-Config";
-    rev = "1690993";
-    hash = "sha256-nszqES4DwopoGM8NR9sieDsx5Nl/tExFKqYr1AWXr7o=";
+    rev = "23f91f2";
+    sha1 = "AsUlmdcwrFH+vsoyCMYvTiuaOLE=";
   };
 
   installPhase = ''

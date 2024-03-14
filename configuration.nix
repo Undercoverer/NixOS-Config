@@ -116,20 +116,20 @@
     nixos-rebuild-commit = import ./nixos-rebuild-commit.nix {inherit pkgs;};
   in
     with pkgs; [
-      nixos-rebuild-commit
-      kdevelop
-      kate
+      git
+      libnotify
+      alejandra
+      jdk8
+      jdk11
+      jdk17
       nil
+
+      nixos-rebuild-commit
+      kate
       jetbrains-toolbox
       unstable.vesktop
       spotify
       prismlauncher
-      jdk8
-      jdk11
-      jdk17
-      libnotify
-      alejandra
-      git
     ];
 
   programs = {
