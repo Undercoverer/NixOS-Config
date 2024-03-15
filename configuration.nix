@@ -133,8 +133,10 @@
       jdk11
       jdk17
       nil
-      appimage-run
-      libsecret
+
+      (appimage-run.override {
+        extraPkgs = pkgs: [pkgs.libsecret];
+      })
 
       nixos-rebuild-commit
       kate
