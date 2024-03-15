@@ -20,6 +20,20 @@
     kernelPackages = pkgs.linuxKernel.packages.linux_6_7;
     kernelModules = ["acpi_call"];
     extraModulePackages = [config.boot.kernelPackages.acpi_call];
+
+    binfmt.registrations.appimage = {
+      wrapInterpreterInShell = false;
+      interpreter = "${pkgs.appimage-run}/bin/appimage-run";
+      recognitionType = "magic";
+      offset = 0;
+      mask = ''\xff\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff'';
+      magicOrExtension = ''\x7fELF....AI\x02'';
+    };
+  };
+
+  virtualisation.docker = {
+    enable = true;
+    enableNvidia = true;
   };
 
   networking = {
@@ -35,6 +49,10 @@
     enable = true;
     driSupport = true;
     driSupport32Bit = true;
+
+    extraPackages = with pkgs; [
+      vaapiVdpau
+    ];
   };
 
   hardware.nvidia = {
@@ -69,6 +87,7 @@
   sound.enable = true;
 
   services = {
+    fstrim.enable = true;
     mullvad-vpn = {
       enable = true;
       enableExcludeWrapper = true;
@@ -107,7 +126,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.foxkj = {
     isNormalUser = true;
-    extraGroups = ["wheel" "networkmanager"];
+    extraGroups = ["wheel" "networkmanager" "docker"];
     hashedPassword = "$y$j9T$u8NldUWSzg7/J9KeQO6sF1$B.SsPsPMZlBoow0AzF/B/5f8kCWzlSR4E7aeWr/4vv4";
   };
 
@@ -123,6 +142,7 @@
       jdk11
       jdk17
       nil
+      appimage-run
 
       nixos-rebuild-commit
       kate
@@ -130,6 +150,7 @@
       unstable.vesktop
       spotify
       prismlauncher
+      bitwarden
     ];
 
   programs = {
