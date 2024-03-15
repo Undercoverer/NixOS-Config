@@ -221,6 +221,7 @@
         libidn
         libjack2
         libjpeg
+        libsecret
         libmikmod
         libogg
         libpng12
