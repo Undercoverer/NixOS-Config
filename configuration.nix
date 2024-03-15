@@ -134,6 +134,7 @@
       jdk17
       nil
       appimage-run
+      libsecret
 
       nixos-rebuild-commit
       kate
