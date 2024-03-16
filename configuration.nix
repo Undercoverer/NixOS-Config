@@ -20,6 +20,11 @@
     kernelPackages = pkgs.linuxKernel.packages.linux_6_7;
     kernelModules = ["acpi_call"];
     extraModulePackages = [config.boot.kernelPackages.acpi_call];
+
+    kernelParams = [
+      "quiet"
+      "splash"
+    ];
   };
 
   virtualisation.docker = {
@@ -145,6 +150,8 @@
       spotify
       prismlauncher
       bitwarden
+      megasync
+      calibre
     ];
 
   programs = {
