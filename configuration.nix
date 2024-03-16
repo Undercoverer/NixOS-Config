@@ -30,7 +30,6 @@
   };
 
   networking = {
-    hostName = "nixos";
     networkmanager.enable = true;
     firewall = {
       enable = false;
@@ -64,6 +63,17 @@
       };
       amdgpuBusId = "PCI:4:0:0";
       nvidiaBusId = "PCI:1:0:0";
+    };
+  };
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    settings = {
+      General = {
+        Enable = "Source,Sink,Media,Socket";
+        Experimental = true;
+      };
     };
   };
 
@@ -123,6 +133,8 @@
     hashedPassword = "$y$j9T$u8NldUWSzg7/J9KeQO6sF1$B.SsPsPMZlBoow0AzF/B/5f8kCWzlSR4E7aeWr/4vv4";
   };
 
+  users.defaultUserShell = pkgs.zsh;
+
   environment.systemPackages = let
     unstable = import <nixos-unstable> {};
     nixos-rebuild-commit = import ./nixos-rebuild-commit.nix {inherit pkgs;};
@@ -158,7 +170,20 @@
       enable = true;
       gamescopeSession.enable = true;
     };
+
     java.enable = true;
+
+    zsh = {
+      enable = true;
+      autosuggestions.enable = true;
+      syntaxHighlighting.enable = true;
+      ohMyZsh = {
+        enable = true;
+        theme = "kphoen";
+        plugins = ["sudo" "safe-paste" "history"];
+      };
+      enableBashCompletion = true;
+    };
 
     firefox = {
       enable = true;
