@@ -14,7 +14,13 @@
 
   boot = {
     loader = {
-      systemd-boot.enable = true;
+      systemd-boot = {
+        enable = true;
+        consoleMode = "auto";
+        editor = false;
+        netbootxyz.enable = true;
+        configurationLimit = 8;
+      };
       efi.canTouchEfiVariables = true;
     };
 
@@ -23,6 +29,34 @@
     extraModulePackages = [config.boot.kernelPackages.acpi_call];
 
     kernelParams = ["quiet" "loglevel=3" "systemd.show_status=auto" "rd.udev.log_level=3"];
+  };
+
+
+  xdg = {
+    portal = {
+      enable = true;
+      xdgOpenUsePortal = true;
+      };
+  };
+
+  environment.sessionVariables = {
+    MOZ_USE_XINPUT2 = "1";
+    OPENSSL_CONF = "/etc/openssl/openssl.cnf";
+  };
+
+  fonts = {
+    enableGhostscriptFonts = true;
+    enableDefaultPackages = true;
+  };
+
+  documentation = {
+    enable = true;
+    dev.enable = true;
+  };
+
+  security.sudo = {
+    wheelNeedsPassword = false;
+    execWheelOnly = true;
   };
 
   virtualisation.docker = {
@@ -38,42 +72,48 @@
   };
 
   # Enable OpenGL
-  hardware.opengl = {
-    enable = true;
-    driSupport = true;
-    driSupport32Bit = true;
+  hardware = {
+    enableAllFirmware = true;
 
-    extraPackages = with pkgs; [
-      vaapiVdpau
-    ];
-  };
+    opengl = {
+      enable = true;
+      driSupport = true;
+      driSupport32Bit = true;
 
-  hardware.nvidia = {
-    package = config.boot.kernelPackages.nvidiaPackages.production;
-    modesetting.enable = true;
-    powerManagement.enable = true;
-    powerManagement.finegrained = true;
-
-    open = false;
-    nvidiaSettings = true;
-
-    prime = {
-      offload = {
-        enable = true;
-        enableOffloadCmd = true;
-      };
-      amdgpuBusId = "PCI:4:0:0";
-      nvidiaBusId = "PCI:1:0:0";
+      extraPackages = with pkgs; [
+        vaapiVdpau
+      ];
     };
-  };
 
-  hardware.bluetooth = {
-    enable = true;
-    powerOnBoot = true;
-    settings = {
-      General = {
-        Enable = "Source,Sink,Media,Socket";
-        Experimental = true;
+    logitech.wireless = {
+      enable = true;
+      enableGraphical = true;
+    };
+
+    nvidia = {
+      package = config.boot.kernelPackages.nvidiaPackages.production;
+      modesetting.enable = true;
+      powerManagement.enable = true;
+      powerManagement.finegrained = true;
+
+      prime = {
+        offload = {
+          enable = true;
+          enableOffloadCmd = true;
+        };
+        amdgpuBusId = "PCI:4:0:0";
+        nvidiaBusId = "PCI:1:0:0";
+      };
+    };
+
+    bluetooth = {
+      enable = true;
+      powerOnBoot = true;
+      settings = {
+        General = {
+          Enable = "Source,Sink,Media,Socket";
+          Experimental = true;
+        };
       };
     };
   };
@@ -81,17 +121,11 @@
   # Set your time zone.
   time.timeZone = "America/New_York";
 
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
-  console = {
-    font = "Lat2-Terminus16";
-    useXkbConfig = true; # use xkb.options in tty.
-  };
-
   sound.enable = true;
 
   services = {
     fstrim.enable = true;
+
     mullvad-vpn = {
       enable = true;
       enableExcludeWrapper = true;
@@ -113,38 +147,38 @@
       displayManager.sddm = {
         enable = true;
         wayland.enable = true;
+        autoNumlock = true;
       };
+
       displayManager.defaultSession = "plasmawayland";
 
       desktopManager.plasma5 = {
         enable = true;
         useQtScaling = true;
+
+        bigscreen.enable = true;
       };
 
       videoDrivers = ["nvidia"];
-      xkb.layout = "us";
-    };
+      };
+
     printing.enable = true;
   };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.foxkj = {
-    isNormalUser = true;
-    extraGroups = ["wheel" "networkmanager" "docker"];
-    hashedPassword = "$y$j9T$u8NldUWSzg7/J9KeQO6sF1$B.SsPsPMZlBoow0AzF/B/5f8kCWzlSR4E7aeWr/4vv4";
-  };
+  users = {
+    defaultUserShell = pkgs.zsh;
 
-  users.defaultUserShell = pkgs.zsh;
+    users.foxkj = {
+      isNormalUser = true;
+      extraGroups = [ "wheel" "networkmanager" "docker" "eduroam"];
+      hashedPassword = "$y$j9T$u8NldUWSzg7/J9KeQO6sF1$B.SsPsPMZlBoow0AzF/B/5f8kCWzlSR4E7aeWr/4vv4";
+      description = "Fox Johnjulio";
+    };
+  };
 
   environment.systemPackages = let
     unstable = import <nixos-unstable> {};
     nixos-rebuild-commit = import ./nixos-rebuild-commit.nix {inherit pkgs;};
-    nix-software-center = import (pkgs.fetchFromGitHub {
-      owner = "snowfallorg";
-      repo = "nix-software-center";
-      rev = "0.1.2";
-      sha256 = "xiqF1mP8wFubdsAQ1BmfjzCgOD3YZf7EGWl9i69FTls=";
-    }) {};
   in
     with pkgs; [
       git
@@ -155,20 +189,24 @@
       jdk17
       nil
 
-      (appimage-run.override {
+      (unstable.appimage-run.override {
         extraPkgs = pkgs: [pkgs.libsecret];
       })
 
+      xwayland
       nixos-rebuild-commit
       kate
       jetbrains-toolbox
       unstable.vesktop
       spotify
-      prismlauncher
+
+      (prismlauncher.override {
+        additionalLibs = [vulkan-loader];
+      })
+
       bitwarden
       megasync
       calibre
-      nix-software-center
     ];
 
   programs = {
@@ -325,20 +363,22 @@
     };
   };
 
-  xdg = {
-    portal = {
-      enable = true;
-      xdgOpenUsePortal = true;
-      wlr.enable = true;
-    };
-  };
-
   system = {
     copySystemConfiguration = true;
     stateVersion = "23.11";
   };
 
-  environment.sessionVariables = {
-    MOZ_USE_XINPUT2 = "1";
-  };
+  systemd.services.wpa_supplicant.environment.OPENSSL_CONF = pkgs.writeText "openssl.cnf" ''
+    openssl_conf = default_conf
+
+    [ default_conf ]
+    ssl_conf = ssl_sect
+
+    [ ssl_sect ]
+    system_default = system_default_sect
+
+    [ system_default_sect ]
+    CipherString = Default:@SECLEVEL=0
+    Options = UnsafeLegacyRenegotiation
+  '';
 }
