@@ -6,13 +6,13 @@
 
 mkYarnPackage rec {
   pname = "gitbutler-ui";
-  version = "0.10.27";
+  version = "0.10.28";
 
   src = fetchFromGitHub {
     owner = "gitbutlerapp";
     repo = "gitbutler";
     rev = "release/${version}";
-    hash = "sha256-Y8LurSQKhjHX3RUiuOdHtPkZK5NKmx3eqQ5NGtnhMlY=";
+    hash = "sha256-j1ioqLcYxrBni8siO5DXLLPCQawAzzZgDumKizPhh1Y=";
   };
 
   sourceRoot = "${src.name}/gitbutler-ui";
@@ -26,7 +26,7 @@ mkYarnPackage rec {
   yarnLock = ./yarn.lock;
   offlineCache = fetchYarnDeps {
     inherit yarnLock;
-    hash = "sha256-rggtkfE6An8It0Rvgfk0J8JHpg0NbLiweRsz0nM/tzM=";
+    hash = "sha256-ilU8t2jj7w41PyGazZvnKCvQ5EMeo4CsZL0hxNeXQ04=";
   };
 
   preConfigure = ''
@@ -53,10 +53,9 @@ mkYarnPackage rec {
 
   distPhase = "true";
 
-  meta = rec {
-    description = "The UI for GitButler.";
+  meta = {
+    description = "Git client for simultaneous branches on top of your existing workflow";
     homepage = "https://gitbutler.com";
-    downloadPage = homepage;
     changelog = "https://github.com/gitbutlerapp/gitbutler/releases/tag/release/${version}";
     license = {
       fullName = "Functional Source License, Version 1.0, MIT Change License";
@@ -65,7 +64,6 @@ mkYarnPackage rec {
       redistributable = true;
     };
     maintainers = with lib.maintainers; [ hacker1024 ];
-    platforms = with lib.platforms; all;
-    sourceProvenance = with lib.sourceTypes; [ fromSource ];
+    platforms = lib.platforms.all;
   };
 }

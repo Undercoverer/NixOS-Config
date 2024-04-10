@@ -7,10 +7,13 @@
   pkgs,
   ...
 }: {
-  imports = [./hardware-configuration.nix];
+  imports = [
+    ./hardware-configuration.nix
+  ];
 
   nixpkgs.config.allowUnfree = true;
   nix.settings.experimental-features = ["nix-command" "flakes"];
+
 
   boot = {
     loader = {
@@ -24,29 +27,36 @@
       efi.canTouchEfiVariables = true;
     };
 
-    kernelPackages = pkgs.linuxKernel.packages.linux_6_7;
-    kernelModules = ["acpi_call"];
+    kernelPackages = pkgs.linuxKernel.packages.linux_zen;
+    kernelModules = ["acpi_call" "kvm-amd"];
     extraModulePackages = [config.boot.kernelPackages.acpi_call];
 
-    kernelParams = ["quiet" "loglevel=3" "systemd.show_status=auto" "rd.udev.log_level=3"];
-  };
+    kernelParams = [
+      "mem_sleep_default=deep"
+      "pcie_aspm.policy=powersupersave"
+      "acpi.prefer_microsoft_dsm_guid=1"
+    ];
 
+    blacklistedKernelModules = [ "nouveau" ];
+  };
 
   xdg = {
     portal = {
       enable = true;
       xdgOpenUsePortal = true;
-      };
+    };
   };
 
   environment.sessionVariables = {
     MOZ_USE_XINPUT2 = "1";
-    OPENSSL_CONF = "/etc/openssl/openssl.cnf";
   };
 
   fonts = {
     enableGhostscriptFonts = true;
     enableDefaultPackages = true;
+    packages = with pkgs; [
+      (nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
+    ];
   };
 
   documentation = {
@@ -64,6 +74,8 @@
     enableNvidia = true;
   };
 
+  virtualisation.waydroid.enable = true;
+
   networking = {
     networkmanager.enable = true;
     firewall = {
@@ -75,6 +87,7 @@
   hardware = {
     enableAllFirmware = true;
 
+    amdgpu.loadInInitrd = true;
     opengl = {
       enable = true;
       driSupport = true;
@@ -82,6 +95,7 @@
 
       extraPackages = with pkgs; [
         vaapiVdpau
+        libvdpau-va-gl
       ];
     };
 
@@ -94,7 +108,7 @@
       package = config.boot.kernelPackages.nvidiaPackages.production;
       modesetting.enable = true;
       powerManagement.enable = true;
-      powerManagement.finegrained = true;
+#       powerManagement.finegrained = true;
 
       prime = {
         offload = {
@@ -111,12 +125,15 @@
       powerOnBoot = true;
       settings = {
         General = {
-          Enable = "Source,Sink,Media,Socket";
-          Experimental = true;
+          Experimental = "true";
+          ControllerMode = "dual";
+          JustWorksRepairing = "always";
+          KernelExperimental = "true";
         };
       };
     };
   };
+
 
   # Set your time zone.
   time.timeZone = "America/New_York";
@@ -160,24 +177,38 @@
       };
 
       videoDrivers = ["nvidia"];
-      };
+    };
 
-    printing.enable = true;
+    printing = {
+      enable = true;
+      cups-pdf = {
+        enable = true;
+        instances = {
+          pdf = {
+            settings = {
+              Out = "\${HOME}/cups-pdf";
+              UserUMask = "0033";
+            };
+          };
+        };
+      };
+    };
   };
+
 
   users = {
     defaultUserShell = pkgs.zsh;
 
     users.foxkj = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "networkmanager" "docker" "eduroam"];
+      extraGroups = ["wheel" "networkmanager" "docker" "eduroam"];
       hashedPassword = "$y$j9T$u8NldUWSzg7/J9KeQO6sF1$B.SsPsPMZlBoow0AzF/B/5f8kCWzlSR4E7aeWr/4vv4";
       description = "Fox Johnjulio";
     };
   };
 
   environment.systemPackages = let
-    unstable = import <nixos-unstable> {};
+    unstable = import <nixos-unstable> { config.allowUnfree = true; };
     nixos-rebuild-commit = import ./nixos-rebuild-commit.nix {inherit pkgs;};
   in
     with pkgs; [
@@ -193,7 +224,7 @@
         extraPkgs = pkgs: [pkgs.libsecret];
       })
 
-      (import ./gitbutler-package/gitbutler-package.nix { inherit pkgs unstable; })
+      (import ./gitbutler-package/gitbutler-package.nix {inherit pkgs unstable;})
 
       xwayland
       nixos-rebuild-commit
@@ -206,10 +237,16 @@
         additionalLibs = [vulkan-loader];
       })
 
+      jupyter-all
       bitwarden
       megasync
       calibre
       libreoffice-qt
+      ungoogled-chromium
+      zoom-us
+      unstable.postman
+      vlc
+      ffmpeg
     ];
 
   programs = {
@@ -268,5 +305,12 @@
     [ system_default_sect ]
     Options = UnsafeLegacyRenegotiation
   '';
-}
 
+  systemd.user.services.mpris-proxy = {
+    description = "Mpris proxy";
+    after = [ "network.target" "sound.target" ];
+    wantedBy = [ "default.target" ];
+    serviceConfig.ExecStart = "${pkgs.bluez}/bin/mpris-proxy";
+  };
+
+}
